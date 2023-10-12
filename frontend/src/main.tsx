@@ -1,23 +1,20 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { BrowserRouter } from 'react-router-dom'
-import { CSSReset, ChakraProvider } from '@chakra-ui/react'
-import { Provider } from 'react-redux'
-import { store } from './app/store.ts'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import { BrowserRouter } from "react-router-dom";
+import { CSSReset, ChakraProvider } from "@chakra-ui/react";
+import { Provider } from "react-redux";
+import { store } from "./app/store.ts";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
-    <ChakraProvider >
-      <CSSReset />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-   
-    </ChakraProvider>
+      <ChakraProvider>
+        <CSSReset />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ChakraProvider>
     </Provider>
-
   </React.StrictMode>
-)
+);

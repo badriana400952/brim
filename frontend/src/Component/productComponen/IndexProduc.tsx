@@ -29,24 +29,22 @@ import {
   Spinner,
   Center,
 } from "@chakra-ui/react";
-import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import {
   Product,
-  deleteProduct,
   getProduct,
   productSelector,
 } from "../../features/Product/poductSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { ApiData } from "../../hooks/api";
 const IndexProduc = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
   const [form, setForm] = useState<Product>({
-    id: 0,
+    id: "",
     name: "",
     category: "",
     price: 0,
@@ -57,6 +55,7 @@ const IndexProduc = () => {
   console.log(products, error, loading);
   async function handleAddProduct(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("price", form.price.toString());
@@ -69,19 +68,26 @@ const IndexProduc = () => {
     dispatch(getProduct());
   }
 
+  async function handleDeleteProduct(id: string) {
+    const response = await ApiData.delete(`/deleteproduct/${id}`);
+    console.log("response", response);
+
+    dispatch(getProduct());
+  }
+
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    const {name, value, files} = event.target
+    const { name, value, files } = event.target;
 
     if (files) {
       setForm({
-        ...form, 
-        [name]: files[0]
-      })
+        ...form,
+        [name]: files[0],
+      });
     } else {
       setForm({
         ...form,
-        [name]: value
-      })
+        [name]: value,
+      });
     }
   }
 
@@ -93,7 +99,7 @@ const IndexProduc = () => {
       [name]: value,
     });
   }
-  
+
   useEffect(() => {
     dispatch(getProduct());
   }, [dispatch]);
@@ -160,10 +166,7 @@ const IndexProduc = () => {
                       </FormControl>
 
                       <FormLabel mt={"20px"}>Category</FormLabel>
-                      <Select
-                        onChange={handleChangeSelect}
-                        name="category"
-                      >
+                      <Select onChange={handleChangeSelect} name="category">
                         <option value="" hidden>
                           Options
                         </option>
@@ -221,12 +224,8 @@ const IndexProduc = () => {
                       <Th>Edit</Th>
                     </Tr>
                   </Thead>
-                  {loading && loading ? (
-                    <Center
-                      display={"flex"}
-                      marginTop={"150px"}
-                      marginLeft={"200px"}
-                    >
+                  {loading ? (
+                    <Center display="flex" marginTop="150px" marginLeft="200px">
                       <Spinner
                         thickness="4px"
                         speed="0.65s"
@@ -235,68 +234,24 @@ const IndexProduc = () => {
                         size="xl"
                       />
                     </Center>
-                  ) : error && error ? (
+                  ) : error ? (
                     <Box color="red.500">{error}</Box>
                   ) : (
                     <Tbody>
                       {Array.isArray(products) &&
-                        products.map((items, index) => (
+                        products.map((item, index) => (
                           <Tr key={index}>
-                            <Td>{items.name}</Td>
-                            <Td>{items.category}</Td>
-                            <Td>{items.price}</Td>
-                            <Td onClick={() => handleDelete(items.id)}>
+                            <Td>{item.name}</Td>
+                            <Td>{item.category}</Td>
+                            <Td>{item.price}</Td>
+                            <Td
+                              cursor={"pointer"}
+                              onClick={() => handleDeleteProduct(item.id)}
+                            >
                               <FaTrashAlt />
                             </Td>
                             <Td>
-                              <Link to={`/product/${items.id}`}>edit </Link>
-                              {/* <Box>
-                                                            <Button onClick={onOpen} ><FaPen /></Button>
-                                                            <Modal
-                                                                initialFocusRef={initialRef}
-                                                                finalFocusRef={finalRef}
-                                                                isOpen={isOpen}
-                                                                onClose={onClose}
-                                                                size={'xl'}
-
-                                                            >
-                                                                <ModalOverlay />
-                                                                <form onSubmit={handleEdit}>
-                                                                    <ModalContent>
-                                                                        <ModalHeader>Create your account</ModalHeader>
-                                                                        <ModalCloseButton />
-                                                                        <ModalBody pb={6}>
-                                                                            <FormControl>
-                                                                                <FormLabel>Product Name</FormLabel>
-                                                                                <Input ref={initialRef} placeholder='Product Name'
-                                                                                    type='text' name='name' onChange={(e) => setName(e.target.value)} />
-                                                                            </FormControl>
-
-                                                                            <FormLabel mt={'20px'}>Category</FormLabel>
-                                                                            <Select onChange={(e) => setCategory(e.target.value)} name='category'>
-                                                                                <option value='' hidden >Options</option>
-                                                                                <option value='food'>Food</option>
-                                                                                <option value='beferages'>Beferages</option>
-                                                                            </Select>
-
-                                                                            <FormControl mt={'20px'}>
-                                                                                <FormLabel>price</FormLabel>
-                                                                                <Input placeholder='price' name='price' onChange={(e) => setPrice(e.target.value)} />
-                                                                            </FormControl>
-
-
-                                                                        </ModalBody>
-
-                                                                        <ModalFooter>
-                                                                            <Button colorScheme='blue' onClick={onClose} mr={3} type='submit'>
-                                                                                Save
-                                                                            </Button>
-                                                                            <Button onClick={onClose}>Cancel</Button>
-                                                                        </ModalFooter>
-                                                                    </ModalContent>
-                                                                </form>
-                                                            </Modal>
-                                                        </Box> */}
+                              <Link to={`/product/${item.id}`}>edit </Link>
                             </Td>
                           </Tr>
                         ))}
@@ -320,8 +275,8 @@ const IndexProduc = () => {
                     {Array.isArray(products) &&
                       products
                         .filter((item) => item.category === "makanan") // Filter produk dengan kategori 'food'
-                        .map((item, index) => (
-                          <Tr key={index}>
+                        .map((item) => (
+                          <Tr key={item.id}>
                             <Td>{item.name}</Td>
                             <Td>{item.category}</Td>
                             <Td>{item.price}</Td>
@@ -345,8 +300,8 @@ const IndexProduc = () => {
                     {Array.isArray(products) &&
                       products
                         .filter((item) => item.category === "minuman") // Filter produk dengan kategori 'food'
-                        .map((item, index) => (
-                          <Tr key={index}>
+                        .map((item) => (
+                          <Tr key={item.id}>
                             <Td>{item.name}</Td>
                             <Td>{item.category}</Td>
                             <Td>{item.price}</Td>

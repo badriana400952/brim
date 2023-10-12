@@ -7,6 +7,7 @@ import authenticate from "../middleware/authenticate";
 import PaymentController from "../controllers/PaymentController";
 import { upload } from "../middleware/uploadFile";
 import TableController from "../controllers/TableController";
+import PaymentHistoryController from "../controllers/PaymentHistoryCont";
 
 const root = express.Router();
 root.get("/", (req: Request, res: Response) => {
@@ -35,5 +36,8 @@ root.get("/table", TableController.find);
 
 //payment
 root.post("/history",PaymentController.create);
+
+// payment-history
+root.get("/paymenthistory", PaymentHistoryController.find);
 
 export default root;
